@@ -31,6 +31,10 @@ async fn main() {
         .layer(axum::middleware::from_fn(auth_middleware))
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/login", post(auth::login))
+        // Register the /register route for user registration
+        .route("/register", post(auth::register))
+        // Register the /user route for user-only access
+        .route("/user", get(protected::user_route))
         .layer(CorsLayer::permissive());
 
     println!("Server running on http://localhost:3000");
@@ -42,6 +46,3 @@ async fn main() {
 //   'http://localhost:3000/admin'
 //   -H 'accept: application/json'
 //   -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc1MDQzNjk5Mn0.BvFjNJ46EV93tg-we8iFeBaU83XrnnXpLEAL1Mplp64'
-
-// replace the string on the secret key in the middleware and login
-//  use env variables
