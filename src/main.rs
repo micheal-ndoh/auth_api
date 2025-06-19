@@ -27,13 +27,21 @@ async fn main() {
     struct ApiDoc;
 
     let app = Router::new()
-        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
-        .route("/login", post(auth::login))
         .route("/admin", get(protected::admin_route))
         .layer(axum::middleware::from_fn(auth_middleware))
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .route("/login", post(auth::login))
         .layer(CorsLayer::permissive());
 
     println!("Server running on http://localhost:3000");
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
+
+// curl -X 'GET'                                                                                                                                                              [17:27:06]
+//   'http://localhost:3000/admin'
+//   -H 'accept: application/json'
+//   -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc1MDQzNjk5Mn0.BvFjNJ46EV93tg-we8iFeBaU83XrnnXpLEAL1Mplp64'
+
+// replace the string on the secret key in the middleware and login
+//  use env variables
