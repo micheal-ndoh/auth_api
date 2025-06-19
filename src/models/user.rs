@@ -25,3 +25,10 @@ pub struct LoginRequest {
 pub struct LoginResponse {
     pub token: String,
 }
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct RegistrationRequest {
+    pub username: String,
+    pub password: String,
+    pub confirm_password: String,
+}
