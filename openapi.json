@@ -19,21 +19,13 @@
             "description": "Admin access granted",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
+                "schema": { "$ref": "#/components/schemas/User" }
               }
             }
           },
-          "403": {
-            "description": "Forbidden"
-          }
+          "403": { "description": "Forbidden" }
         },
-        "security": [
-          {
-            "api_key": []
-          }
-        ]
+        "security": [{ "api_key": [] }]
       }
     },
     "/login": {
@@ -43,9 +35,7 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
             }
           },
           "required": true
@@ -55,15 +45,11 @@
             "description": "Login successful",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
               }
             }
           },
-          "401": {
-            "description": "Invalid credentials"
-          }
+          "401": { "description": "Invalid credentials" }
         }
       }
     },
@@ -74,21 +60,33 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
             }
           },
           "required": true
         },
         "responses": {
-          "201": {
-            "description": "User registered successfully"
-          },
-          "400": {
-            "description": "Bad request"
-          }
+          "201": { "description": "User registered successfully" },
+          "400": { "description": "Bad request" }
         }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["protected"],
+        "operationId": "user_route",
+        "responses": {
+          "200": {
+            "description": "User access granted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "403": { "description": "Forbidden" }
+        },
+        "security": [{ "api_key": [] }]
       }
     }
   },
@@ -98,27 +96,26 @@
         "type": "object",
         "required": ["email", "password"],
         "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
+          "email": { "type": "string" },
+          "password": { "type": "string" }
         }
       },
       "LoginResponse": {
         "type": "object",
         "required": ["token"],
+        "properties": { "token": { "type": "string" } }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["firstname", "lastname", "email", "password"],
         "properties": {
-          "token": {
-            "type": "string"
-          }
+          "email": { "type": "string" },
+          "firstname": { "type": "string" },
+          "lastname": { "type": "string" },
+          "password": { "type": "string" }
         }
       },
-      "Role": {
-        "type": "string",
-        "enum": ["Admin", "User"]
-      },
+      "Role": { "type": "string", "enum": ["Admin", "User"] },
       "User": {
         "type": "object",
         "required": [
@@ -126,29 +123,16 @@
           "email",
           "firstname",
           "lastname",
-          "password",
+          "password_hash",
           "role"
         ],
         "properties": {
-          "email": {
-            "type": "string"
-          },
-          "firstname": {
-            "type": "string"
-          },
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lastname": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          },
-          "role": {
-            "$ref": "#/components/schemas/Role"
-          }
+          "email": { "type": "string" },
+          "firstname": { "type": "string" },
+          "id": { "type": "integer", "format": "int32" },
+          "lastname": { "type": "string" },
+          "password_hash": { "type": "string" },
+          "role": { "type": "string" }
         }
       }
     }

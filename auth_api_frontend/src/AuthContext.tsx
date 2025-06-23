@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { AuthApi, Configuration, LoginRequest, LoginResponse, User, ProtectedApi } from './ts-client';
+import { AuthApi, Configuration, LoginRequest, LoginResponse, User, ProtectedApi, RegisterRequest } from './ts-client';
 
 const API_BASE = 'https://authapi-backend-01.up.railway.app';
 
@@ -9,7 +9,7 @@ interface AuthContextType {
   refreshToken: string | null;
   login: (data: LoginRequest) => Promise<void>;
   logout: () => void;
-  register: (data: Omit<User, 'id'>) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
   loading: boolean;
 }
 
@@ -49,22 +49,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Fetch user profile (now after logout is defined)
   const fetchUserProfile = useCallback(async (token: string) => {
     try {
-      const response = await fetch(`${API_BASE}/user`, {
+      const protectedApi = new ProtectedApi(getApiConfig(token));
+      const response = await protectedApi.userRoute({
         headers: {
           Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch user data');
-      const data = await response.json();
-      setUser(data);
-      return data;
+      if (response.data) {
+        setUser(response.data);
+        return response.data;
+      }
+      throw new Error('Failed to fetch user data');
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
       logout();
       throw error;
     }
-  }, [logout]);
+  }, [getApiConfig, logout]);
 
   // Helper to set session and timer
   const startSession = useCallback(async (access: string, refresh: string) => {
@@ -95,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Register
-  const register = async (data: Omit<User, 'id'>) => {
+  const register = async (data: RegisterRequest) => {
     setLoading(true);
     try {
       await authApi.register(data);

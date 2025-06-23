@@ -1,4 +1,4 @@
-# User
+# RegisterRequest
 
 
 ## Properties
@@ -7,23 +7,19 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **email** | **string** |  | [default to undefined]
 **firstname** | **string** |  | [default to undefined]
-**id** | **number** |  | [default to undefined]
 **lastname** | **string** |  | [default to undefined]
-**password_hash** | **string** |  | [default to undefined]
-**role** | **string** |  | [default to undefined]
+**password** | **string** |  | [default to undefined]
 
 ## Example
 
 ```typescript
-import { User } from './api';
+import { RegisterRequest } from './api';
 
-const instance: User = {
+const instance: RegisterRequest = {
     email,
     firstname,
-    id,
     lastname,
-    password_hash,
-    role,
+    password,
 };
 ```
 

@@ -9,6 +9,7 @@ docs/AuthApi.md
 docs/LoginRequest.md
 docs/LoginResponse.md
 docs/ProtectedApi.md
+docs/RegisterRequest.md
 docs/Role.md
 docs/User.md
 git_push.sh
