@@ -38,26 +38,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const authApi = new AuthApi(getApiConfig());
 
-  // Fetch user profile
+  // Logout
+  const logout = useCallback(() => {
+    setAccessToken(null);
+    setRefreshToken(null);
+    setUser(null);
+    if (logoutTimer) clearTimeout(logoutTimer);
+  }, []);
+
+  // Fetch user profile (now after logout is defined)
   const fetchUserProfile = useCallback(async (token: string) => {
     try {
-      const protectedApi = new ProtectedApi(getApiConfig(token));
-      const response = await protectedApi.adminRoute({
+      const response = await fetch(`${API_BASE}/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
         },
       });
-      if (response.data) {
-        setUser(response.data);
-        return response.data;
-      }
-      throw new Error('Failed to fetch user data');
+      if (!response.ok) throw new Error('Failed to fetch user data');
+      const data = await response.json();
+      setUser(data);
+      return data;
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
       logout();
       throw error;
     }
-  }, [getApiConfig]);
+  }, [logout]);
 
   // Helper to set session and timer
   const startSession = useCallback(async (access: string, refresh: string) => {
@@ -96,14 +103,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
-
-  // Logout
-  const logout = useCallback(() => {
-    setAccessToken(null);
-    setRefreshToken(null);
-    setUser(null);
-    if (logoutTimer) clearTimeout(logoutTimer);
-  }, []);
 
   // Refresh token
   /*
