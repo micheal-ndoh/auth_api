@@ -42,8 +42,17 @@ async fn main() {
 
     #[derive(OpenApi)]
     #[openapi(
-        info(title = "Auth API", description = "A simple auth API"),
-        paths(auth::login, auth::register, protected::admin_route),
+        info(
+            title = "Auth API",
+            description = "A simple auth API",
+            license(name = "MIT", identifier = "MIT")
+        ),
+        paths(
+            auth::login,
+            auth::register,
+            protected::admin_route,
+            protected::user_route
+        ),
         components(schemas(
             models::User,
             models::Role,
@@ -78,11 +87,11 @@ async fn main() {
         .route("/register", post(auth::register))
         .layer(cors)
         .with_state(state);
-    println!("Running on http://localhost:3000/swagger-ui");
+    println!("Running on http://localhost:3001/swagger-ui");
 
     println!("\nRunning on http://localhost:3000/api-docs/openapi.json");
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
@@ -99,3 +108,4 @@ async fn main() {
 //   "confirm_password": "password",
 //   "username": "admin"
 // }'
+// PGPASSWORD=CrOqatkjSybFHxvYSFHpJFkQPkcxOjMS psql -h turntable.proxy.rlwy.net -U postgres -p 52084 -d railway

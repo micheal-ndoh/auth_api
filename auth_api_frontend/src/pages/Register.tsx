@@ -22,7 +22,7 @@ const Register: React.FC = () => {
         password,
         firstname,
         lastname,
-        role: Role.User
+        
       });
       navigate('/login');
     } catch (err: any) {
