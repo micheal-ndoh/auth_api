@@ -78,6 +78,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/admin", get(protected::admin_route))
+        .route("/user", get(protected::user_route))
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
