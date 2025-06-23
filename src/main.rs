@@ -1,10 +1,12 @@
 use std::sync::{Arc, Mutex};
 
+use axum::http::HeaderValue;
+use axum::http::Method;
 use axum::{
     routing::{get, post},
     Router,
 };
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -56,6 +58,15 @@ async fn main() {
         db,
     };
 
+    let cors = CorsLayer::new()
+        .allow_origin(
+            "https://auth-api-lemon.vercel.app"
+                .parse::<HeaderValue>()
+                .unwrap(),
+        )
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_headers(Any);
+
     let app = Router::new()
         .route("/admin", get(protected::admin_route))
         .layer(axum::middleware::from_fn_with_state(
@@ -65,7 +76,7 @@ async fn main() {
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/login", post(auth::login))
         .route("/register", post(auth::register))
-        .layer(CorsLayer::permissive())
+        .layer(cors)
         .with_state(state);
     println!("Running on http://localhost:3000/swagger-ui");
 
