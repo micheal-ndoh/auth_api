@@ -67,7 +67,7 @@ async fn main() {
 // curl -X 'GET'                                                                                                                                                              [17:27:06]
 //   'http://localhost:3000/admin'
 //   -H 'accept: application/json'
-//   -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc1MDQzNjk5Mn0.BvFjNJ46EV93tg-we8iFeBaU83XrnnXpLEAL1Mplp64'
+//   -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaWNoZWFsQGdtYWlsLmNvbSIsInJvbGUiOiJVc2VyIiwiZXhwIjoxNzUwNzQ3NDE2fQ.4Y3Gmh2uWSAj4ixkuBaahyLP91qsI4xGTATqQzH4RD4'
 
 // curl -X 'POST' \
 //   'http://localhost:3000/register' \

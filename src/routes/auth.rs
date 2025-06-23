@@ -60,7 +60,7 @@ pub async fn login(
 #[utoipa::path(
     post,
     path = "/register",
-    request_body = LoginRequest,
+    request_body = RegisterRequest,
     responses(
         (status = 201, description = "User registered successfully"),
         (status = 400, description = "Bad request")
