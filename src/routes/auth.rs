@@ -1,12 +1,13 @@
 use axum::extract::State;
 use axum::{http::StatusCode, response::IntoResponse, Json};
-use bcrypt::hash_with_salt;
+use bcrypt::{hash, verify, DEFAULT_COST};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde_json::json;
+use sqlx::prelude::*;
 use utoipa::OpenApi;
 
 use crate::middleware::auth::Claims;
-use crate::models::user::RegisterRequest;
+use crate::models::user::{RegisterRequest, User};
 use crate::models::{LoginRequest, LoginResponse, Role};
 use crate::AppState;
 
@@ -27,34 +28,34 @@ pub async fn login(
     State(state): State<AppState>,
     Json(payload): Json<LoginRequest>,
 ) -> impl IntoResponse {
-    let users = state.users.lock().unwrap();
+    let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE email = $1")
+        .bind(&payload.email)
+        .fetch_optional(&state.db)
+        .await
+        .unwrap();
 
-    // Check if the user exists and the password matches
-    let user = users.iter().find(|u| u.email == payload.email);
-    if user.is_none()
-        || bcrypt::verify(payload.password.as_bytes(), &user.unwrap().password).ok() != Some(true)
-    {
-        return (
-            StatusCode::UNAUTHORIZED,
-            Json(json!({"error": "Invalid credentials"})),
-        )
-            .into_response();
+    if let Some(user) = user {
+        if verify(&payload.password, &user.password_hash).unwrap() {
+            let claims = Claims {
+                sub: user.email.clone(),
+                role: user.role.clone(),
+                exp: (chrono::Utc::now() + chrono::Duration::minutes(10)).timestamp() as usize,
+            };
+            let config = state.config.clone();
+            let token = encode(
+                &Header::default(),
+                &claims,
+                &EncodingKey::from_secret(config.jwt_secret.as_ref()),
+            )
+            .unwrap();
+            return (StatusCode::OK, Json(LoginResponse { token })).into_response();
+        }
     }
-
-    let claims = Claims {
-        sub: payload.email.clone(),
-        role: user.unwrap().role.clone(),
-        exp: (chrono::Utc::now() + chrono::Duration::hours(24)).timestamp() as usize,
-    };
-    let config = state.config.clone();
-    let token = encode(
-        &Header::default(),
-        &claims,
-        &EncodingKey::from_secret(config.jwt_secret.as_ref()),
+    (
+        StatusCode::UNAUTHORIZED,
+        Json(json!({"error": "Invalid credentials"})),
     )
-    .unwrap();
-
-    return (StatusCode::OK, Json(LoginResponse { token })).into_response();
+        .into_response()
 }
 
 #[utoipa::path(
@@ -70,7 +71,6 @@ pub async fn register(
     State(state): State<AppState>,
     Json(payload): Json<RegisterRequest>,
 ) -> impl IntoResponse {
-    // In production, save to a database
     if payload.email.is_empty() || payload.password.is_empty() {
         return (
             StatusCode::BAD_REQUEST,
@@ -78,33 +78,27 @@ pub async fn register(
         )
             .into_response();
     }
-
-    // Here you would typically hash the password and save the user to a database
-    let config = state.config.clone();
-    let hashed_password = hash_with_salt(
-        payload.password.as_bytes(),
-        bcrypt::DEFAULT_COST,
-        config.jwt_salt,
+    let hashed_password = hash(&payload.password, DEFAULT_COST).unwrap();
+    let user = sqlx::query_as::<_, User>(
+        "INSERT INTO users (email, firstname, lastname, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, firstname, lastname, password_hash, role"
     )
-    .unwrap();
-
-    let mut users = state.users.lock().unwrap();
-
-    let new_user = crate::models::User {
-        id: users.len() as i32 + 1,
-        email: payload.email,
-        password: hashed_password.to_string(),
-        firstname: payload.firstname,
-        lastname: payload.lastname,
-        role: Role::User,
-    };
-
-    users.push(new_user);
-
-    // Simulate successful registration
-    (
-        StatusCode::CREATED,
-        Json(json!({"message": "User registered successfully"})),
-    )
-        .into_response()
+    .bind(&payload.email)
+    .bind(&payload.firstname)
+    .bind(&payload.lastname)
+    .bind(&hashed_password)
+    .bind(Role::User)
+    .fetch_one(&state.db)
+    .await;
+    match user {
+        Ok(_user) => (
+            StatusCode::CREATED,
+            Json(json!({"message": "User registered successfully"})),
+        )
+            .into_response(),
+        Err(e) => (
+            StatusCode::CONFLICT,
+            Json(json!({"error": format!("Failed to register user: {}", e)})),
+        )
+            .into_response(),
+    }
 }
