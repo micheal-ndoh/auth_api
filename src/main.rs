@@ -75,10 +75,9 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-// curl -X 'GET'                                                                                                                                                              [17:27:06]
-//   'http://localhost:3000/admin'
-//   -H 'accept: application/json'
-//   -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaWNoZWFsQGdtYWlsLmNvbSIsInJvbGUiOiJVc2VyIiwiZXhwIjoxNzUwNzQ3NDE2fQ.4Y3Gmh2uWSAj4ixkuBaahyLP91qsI4xGTATqQzH4RD4'
+// curl -X GET "http://localhost:3000/admin" \
+//   -H "accept: application/json" \
+//   -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaWNAZ21haWwuY29tIiwicm9sZSI6IlVzZXIiLCJleHAiOjE3NTA2NzkxODR9.DuNQMTyzjzfZ2wu70JaorVuWxe3V7iymcXxqomz8UBs"
 
 // curl -X 'POST' \
 //   'http://localhost:3000/register' \

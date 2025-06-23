@@ -17,7 +17,7 @@ use crate::{
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,
-    pub role: Role,
+    pub role: String,
     pub exp: usize,
 }
 
@@ -44,7 +44,7 @@ pub async fn auth_middleware(
     let user = User {
         id: 1, // In production, fetch from DB
         email: String::new(),
-        password: String::new(),
+        password_hash: String::new(),
         role: token_data.claims.role,
         firstname: String::new(),
         lastname: String::new(),

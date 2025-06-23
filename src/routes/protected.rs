@@ -19,7 +19,7 @@ pub struct ProtectedApi;
     security(("api_key" = []))
 )]
 pub async fn admin_route(Extension(user): Extension<Arc<User>>) -> impl IntoResponse {
-    if user.role == Role::Admin {
+    if user.role == "Admin" {
         (StatusCode::OK, Json(user)).into_response()
     } else {
         (
@@ -40,7 +40,7 @@ pub async fn admin_route(Extension(user): Extension<Arc<User>>) -> impl IntoResp
     security(("api_key" = []))
 )]
 pub async fn user_route(Extension(user): Extension<Arc<User>>) -> impl IntoResponse {
-    if user.role == Role::User {
+    if user.role == "User" {
         (StatusCode::OK, Json(user)).into_response()
     } else {
         (
