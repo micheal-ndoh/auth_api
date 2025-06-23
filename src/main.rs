@@ -19,14 +19,25 @@ use crate::{
     routes::{auth, protected},
 };
 
+use sqlx::postgres::PgPoolOptions;
+use sqlx::PgPool;
+
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub config: Arc<utils::Config>,
-    pub users: Arc<Mutex<Vec<models::User>>>,
+    pub db: PgPool,
 }
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let db = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&db_url)
+        .await
+        .expect("Failed to connect to DB");
+
     #[derive(OpenApi)]
     #[openapi(
         info(title = "Auth API", description = "A simple auth API"),
@@ -41,8 +52,8 @@ async fn main() {
     struct ApiDoc;
 
     let state = AppState {
-        users: Arc::new(Mutex::new(vec![])),
         config: Arc::new(utils::load_env()),
+        db,
     };
 
     let app = Router::new()
