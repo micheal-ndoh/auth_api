@@ -7,6 +7,8 @@ const Profile: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  console.log('Profile user:', user);
+
   const handleLogout = () => {
     logout();
     navigate('/login');

@@ -38,6 +38,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const authApi = new AuthApi(getApiConfig());
 
+  useEffect(() => {
+    console.log('AuthContext accessToken:', accessToken);
+  }, [accessToken]);
+
+  useEffect(() => {
+    console.log('AuthContext user:', user);
+  }, [user]);
+
   // Logout
   const logout = useCallback(() => {
     setAccessToken(null);
@@ -85,6 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const resp = await authApi.login(data);
+      console.log('Login response:', resp);
       if (resp.data && resp.data.token) {
         await startSession(resp.data.token, ''); // No refreshToken in response
       } else {
@@ -99,7 +108,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (data: RegisterRequest) => {
     setLoading(true);
     try {
-      await authApi.register(data);
+      const resp = await authApi.register(data);
+      console.log('Register response:', resp);
     } finally {
       setLoading(false);
     }
