@@ -9,8 +9,8 @@ Name | Type | Description | Notes
 **firstname** | **string** |  | [default to undefined]
 **id** | **number** |  | [default to undefined]
 **lastname** | **string** |  | [default to undefined]
-**password** | **string** |  | [default to undefined]
-**role** | [**Role**](Role.md) |  | [default to undefined]
+**password_hash** | **string** |  | [default to undefined]
+**role** | **string** |  | [default to undefined]
 
 ## Example
 
@@ -22,7 +22,7 @@ const instance: User = {
     firstname,
     id,
     lastname,
-    password,
+    password_hash,
     role,
 };
 ```

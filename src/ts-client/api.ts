@@ -22,7 +22,6 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
-export * from './configuration';
 
 /**
  * 
@@ -55,6 +54,37 @@ export interface LoginResponse {
      * @memberof LoginResponse
      */
     'token': string;
+}
+/**
+ * 
+ * @export
+ * @interface RegisterRequest
+ */
+export interface RegisterRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequest
+     */
+    'email': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequest
+     */
+    'firstname': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequest
+     */
+    'lastname': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequest
+     */
+    'password': string;
 }
 /**
  * 
@@ -105,16 +135,14 @@ export interface User {
      * @type {string}
      * @memberof User
      */
-    'password': string;
+    'password_hash': string;
     /**
      * 
-     * @type {Role}
+     * @type {string}
      * @memberof User
      */
-    'role': Role;
+    'role': string;
 }
-
-
 
 /**
  * AuthApi - axios parameter creator
@@ -159,13 +187,13 @@ export const AuthApiAxiosParamCreator = function (configuration?: Configuration)
         },
         /**
          * 
-         * @param {LoginRequest} loginRequest 
+         * @param {RegisterRequest} registerRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        register: async (loginRequest: LoginRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'loginRequest' is not null or undefined
-            assertParamExists('register', 'loginRequest', loginRequest)
+        register: async (registerRequest: RegisterRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'registerRequest' is not null or undefined
+            assertParamExists('register', 'registerRequest', registerRequest)
             const localVarPath = `/register`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -185,7 +213,7 @@ export const AuthApiAxiosParamCreator = function (configuration?: Configuration)
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(loginRequest, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(registerRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -216,12 +244,12 @@ export const AuthApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @param {LoginRequest} loginRequest 
+         * @param {RegisterRequest} registerRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async register(loginRequest: LoginRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.register(loginRequest, options);
+        async register(registerRequest: RegisterRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.register(registerRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AuthApi.register']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -247,12 +275,12 @@ export const AuthApiFactory = function (configuration?: Configuration, basePath?
         },
         /**
          * 
-         * @param {LoginRequest} loginRequest 
+         * @param {RegisterRequest} registerRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        register(loginRequest: LoginRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.register(loginRequest, options).then((request) => request(axios, basePath));
+        register(registerRequest: RegisterRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.register(registerRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -277,13 +305,13 @@ export class AuthApi extends BaseAPI {
 
     /**
      * 
-     * @param {LoginRequest} loginRequest 
+     * @param {RegisterRequest} registerRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AuthApi
      */
-    public register(loginRequest: LoginRequest, options?: RawAxiosRequestConfig) {
-        return AuthApiFp(this.configuration).register(loginRequest, options).then((request) => request(this.axios, this.basePath));
+    public register(registerRequest: RegisterRequest, options?: RawAxiosRequestConfig) {
+        return AuthApiFp(this.configuration).register(registerRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -302,6 +330,35 @@ export const ProtectedApiAxiosParamCreator = function (configuration?: Configura
          */
         adminRoute: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/admin`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        userRoute: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/user`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -345,6 +402,17 @@ export const ProtectedApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['ProtectedApi.adminRoute']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async userRoute(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.userRoute(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ProtectedApi.userRoute']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -362,6 +430,14 @@ export const ProtectedApiFactory = function (configuration?: Configuration, base
          */
         adminRoute(options?: RawAxiosRequestConfig): AxiosPromise<User> {
             return localVarFp.adminRoute(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        userRoute(options?: RawAxiosRequestConfig): AxiosPromise<User> {
+            return localVarFp.userRoute(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -381,6 +457,16 @@ export class ProtectedApi extends BaseAPI {
      */
     public adminRoute(options?: RawAxiosRequestConfig) {
         return ProtectedApiFp(this.configuration).adminRoute(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProtectedApi
+     */
+    public userRoute(options?: RawAxiosRequestConfig) {
+        return ProtectedApiFp(this.configuration).userRoute(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
