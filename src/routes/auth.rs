@@ -86,7 +86,7 @@ pub async fn register(
     .bind(&payload.firstname)
     .bind(&payload.lastname)
     .bind(&hashed_password)
-    .bind(Role::User)
+    .bind("User")
     .fetch_one(&state.db)
     .await;
     match user {

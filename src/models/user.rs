@@ -9,7 +9,7 @@ pub struct User {
     pub firstname: String,
     pub lastname: String,
     pub password_hash: String, // Hashed in production
-    pub role: Role,
+    pub role: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, PartialEq)]
