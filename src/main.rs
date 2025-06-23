@@ -56,6 +56,9 @@ async fn main() {
         .route("/register", post(auth::register))
         .layer(CorsLayer::permissive())
         .with_state(state);
+    println!("Running on http://localhost:3000/swagger-ui");
+
+    println!("\nRunning on http://localhost:3000/api-docs/openapi.json");
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
