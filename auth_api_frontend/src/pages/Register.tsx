@@ -5,7 +5,7 @@ import { Role } from '../ts-client';
 import '../styles/Auth.css';
 
 const Register: React.FC = () => {
-  const { register, loading } = useAuth();
+  const { register, login, loading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,9 +22,10 @@ const Register: React.FC = () => {
         password,
         firstname,
         lastname,
-        
       });
-      navigate('/login');
+      // Automatically log the user in after registration
+      await login({ email, password });
+      navigate('/profile');
     } catch (err: any) {
       setError('Registration failed');
     }
