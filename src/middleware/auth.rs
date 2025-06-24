@@ -41,14 +41,13 @@ pub async fn auth_middleware(
     let token_data = decode::<Claims>(token, &key, &Validation::default())
         .map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-    let user = User {
-        id: 1, // In production, fetch from DB
-        email: String::new(),
-        password_hash: String::new(),
-        role: token_data.claims.role,
-        firstname: String::new(),
-        lastname: String::new(),
-    };
+    // Fetch the user from the database using the email from the token
+    let email = token_data.claims.sub;
+    let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE email = $1")
+        .bind(&email)
+        .fetch_one(&state.db)
+        .await
+        .map_err(|_| StatusCode::UNAUTHORIZED)?;
 
     let mut request = req;
     request.extensions_mut().insert(Arc::new(user));
