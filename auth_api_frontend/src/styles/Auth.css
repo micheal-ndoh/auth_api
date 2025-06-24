@@ -168,19 +168,34 @@
   transform: translateX(-50%);
   width: 110px;
   height: 267px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a90e2'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.98 8.95-7 10.18-4.02-1.23-7-5.51-7-10.18V6.3l7-3.12z'/%3E%3C/svg%3E")
-    no-repeat center;
-  background-size: contain;
-  opacity: 0;
-  animation: shieldDrop 1s ease-out forwards 0.5s,
-    beat 0.9s ease-in-out infinite 2s;
+  background-color: #4a90e2; /* default color */
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.98 8.95-7 10.18-4.02-1.23-7-5.51-7-10.18V6.3l7-3.12z'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.98 8.95-7 10.18-4.02-1.23-7-5.51-7-10.18V6.3l7-3.12z'/></svg>");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  opacity: 1;
+  animation: shieldDrop 1s ease-out forwards 0.5s, beatShield 1.5s ease-in-out infinite 2s;
+}
+
+@keyframes beatShield {
+  0%, 100% {
+    background-color: #27a3fc;
+    filter: none;
+  }
+  50% {
+    background-color: #77a2d0;
+    filter: drop-shadow(0 0 12px #8fd6ff) brightness(1.3);
+  }
 }
 
 /* Register page specific */
 .register-container .auth-box::before {
   content: "";
   position: absolute;
-
   top: -70px;
   left: 50%;
   transform: translateX(-50%);
@@ -191,7 +206,7 @@
   background-size: contain;
   opacity: 390;
   animation: friendlyBounce 1s ease-out forwards 0.5s,
-    beat 1s ease-in-out infinite 2s;
+    ;
 }
 
 /* Profile page styles */
@@ -533,6 +548,7 @@ input:disabled {
   filter: blur(4px) brightness(1.1);
   pointer-events: none;
   z-index: 0;
+  transition: filter 0.4s, background 0.4s, box-shadow 0.4s;
 }
 
 /* Lock shape */
@@ -548,6 +564,13 @@ input:disabled {
   animation: floatLock 6s ease-in-out infinite;
 }
 
+.security-shape.lock:hover {
+  filter: brightness(1.5) drop-shadow(0 0 12px #00e2de);
+  background: radial-gradient(circle at 50% 35%, #00e2de 80%, transparent 70%),
+    linear-gradient(to bottom, #fff 0 20%, transparent 80% 100%),
+    radial-gradient(circle at 50% 10%, #e82603 60%, transparent 70%);
+}
+
 /* Shield shape */
 .security-shape.shield {
   width: 110px;
@@ -561,6 +584,13 @@ input:disabled {
   animation: floatShield 8s ease-in-out infinite;
 }
 
+.security-shape.shield:hover {
+  filter: brightness(1.5) drop-shadow(0 0 12px #4ab9e2);
+  background: radial-gradient(ellipse at 50% 60%, #4ab9e2 80%, transparent 80%),
+    linear-gradient(135deg, #8fd6ff 0 30%, transparent 80% 100%),
+    radial-gradient(ellipse at 50% 80%, #357abd 60%, transparent 80%);
+}
+
 /* Key shape */
 .security-shape.key {
   width: 80px;
@@ -572,6 +602,13 @@ input:disabled {
     linear-gradient(45deg, #fff 0 20%, transparent 80% 100%);
   border-radius: 60% 40% 60% 40%/50% 60% 40% 60%;
   animation: floatKey 7s ease-in-out infinite;
+}
+
+.security-shape.key:hover {
+  filter: brightness(1.5) drop-shadow(0 0 12px #f7b731);
+  background: radial-gradient(circle at 30% 60%, #ffe066 80%, transparent 70%),
+    radial-gradient(circle at 70% 30%, #f5cd79 60%, transparent 70%),
+    linear-gradient(45deg, #fff 0 20%, transparent 80% 100%);
 }
 
 /* Fingerprint shape */
@@ -591,6 +628,12 @@ input:disabled {
   animation: floatFingerprint 9s ease-in-out infinite;
 }
 
+.security-shape.fingerprint:hover {
+  filter: brightness(1.5) drop-shadow(0 0 12px #a259f7);
+  background: repeating-radial-gradient(circle at 50% 50%, #a259f7 0 12px, transparent 14px 24px),
+    radial-gradient(circle at 50% 50%, #fff 0 14px, transparent 24px);
+}
+
 /* Padlock shape */
 .security-shape.padlock {
   width: 70px;
@@ -604,79 +647,67 @@ input:disabled {
   animation: floatPadlock 10s ease-in-out infinite;
 }
 
+.security-shape.padlock:hover {
+  filter: brightness(1.5) drop-shadow(0 0 12px #00b894);
+  background: radial-gradient(circle at 50% 60%, #00ffb8 80%, transparent 80%),
+    linear-gradient(to bottom, #fff 0 20%, transparent 80% 100%),
+    radial-gradient(circle at 50% 10%, #0984e3 60%, transparent 70%);
+}
+
+/* Bouncier, less predictable keyframes for each shape */
 @keyframes floatLock {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  25% {
-    transform: translateY(24px) scale(1.04);
-  }
-  50% {
-    transform: translate(40vw, 10vh) scale(1.08);
-  }
-  75% {
-    transform: translateY(-18px) scale(1.02);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  15% { transform: translate(10vw, 5vh) scale(1.08); }
+  30% { transform: translate(-5vw, 10vh) scale(0.96); }
+  45% { transform: translate(15vw, -8vh) scale(1.12); }
+  60% { transform: translate(-10vw, 12vh) scale(1.04); }
+  75% { transform: translate(8vw, -10vh) scale(0.98); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 @keyframes floatShield {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  30% {
-    transform: translate(-30vw, -10vh) scale(1.03);
-  }
-  50% {
-    transform: translateY(-20px) scale(1.06);
-  }
-  80% {
-    transform: translateY(10px) scale(1.01);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  20% { transform: translate(-12vw, -8vh) scale(1.07); }
+  40% { transform: translate(10vw, 12vh) scale(0.95); }
+  60% { transform: translate(-8vw, 10vh) scale(1.11); }
+  80% { transform: translate(12vw, -12vh) scale(1.03); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 @keyframes floatKey {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  20% {
-    transform: translate(10vw, -10vh) scale(1.05);
-  }
-  50% {
-    transform: translateY(30px) scale(1.08);
-  }
-  70% {
-    transform: translate(-10vw, 10vh) scale(1.02);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  18% { transform: translate(8vw, -10vh) scale(1.09); }
+  36% { transform: translate(-12vw, 8vh) scale(0.97); }
+  54% { transform: translate(10vw, 10vh) scale(1.13); }
+  72% { transform: translate(-8vw, -12vh) scale(1.01); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 @keyframes floatFingerprint {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translate(-20vw, 10vh) scale(1.04);
-  }
-  60% {
-    transform: translateY(-25px) scale(1.07);
-  }
-  90% {
-    transform: translateY(15px) scale(1.01);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-10vw, 12vh) scale(1.06); }
+  50% { transform: translate(12vw, -8vh) scale(0.94); }
+  75% { transform: translate(-8vw, -10vh) scale(1.12); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 @keyframes floatPadlock {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
+  0% { transform: translate(0, 0) scale(1); }
+  22% { transform: translate(10vw, -12vh) scale(1.08); }
+  44% { transform: translate(-12vw, 10vh) scale(0.96); }
+  66% { transform: translate(8vw, 12vh) scale(1.14); }
+  88% { transform: translate(-10vw, -8vh) scale(1.02); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* Shield logo and friendly bounce color change on beat forward */
+.login-container .auth-box::before {
+  transition: filter 0.3s, background 0.3s;
+}
+@keyframes beat {
+  0%, 100% {
+    filter: none;
+    background: inherit;
   }
-  35% {
-    transform: translate(15vw, -10vh) scale(1.06);
-  }
-  60% {
-    transform: translateY(20px) scale(1.09);
-  }
-  85% {
-    transform: translate(-10vw, 10vh) scale(1.03);
+  50% {
+    filter: drop-shadow(0 0 12px #8fd6ff) brightness(1.3);
+    background: linear-gradient(135deg, #8fd6ff 0 100%, transparent 100%);
   }
 }
 
