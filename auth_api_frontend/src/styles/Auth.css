@@ -5,17 +5,91 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #04335a 0%, #7796a1 50%);
   padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-container::before,
+.auth-container::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(4px) brightness(1.1);
+  opacity: 0.18;
+}
+
+/* Lock shape (top left, floating) */
+.auth-container::before {
+  top: 8%;
+  left: 4%;
+  width: 90px;
+  height: 120px;
+  background: radial-gradient(circle at 50% 35%, #00bce2 60%, transparent 70%),
+    /* lock body */ linear-gradient(to bottom, #fff 0 20%, transparent 80% 100%),
+    /* highlight */
+      radial-gradient(circle at 50% 10%, #03afe8 40%, transparent 70%); /* lock shackle */
+  border-radius: 40% 40% 50% 50%/30% 30% 70% 70%;
+  animation: floatLock 30s ease-in-out infinite;
+}
+
+/* Shield shape (bottom right, floating) */
+.auth-container::after {
+  bottom: 10%;
+  right: 6%;
+  width: 110px;
+  height: 130px;
+  background: radial-gradient(ellipse at 50% 60%, #4ab9e2 60%, transparent 80%),
+    linear-gradient(135deg, #2a37aa 0 30%, transparent 80% 100%),
+    radial-gradient(ellipse at 50% 80%, #357abd 40%, transparent 80%);
+
+  border-radius: 50% 50% 70% 70%/40% 40% 90% 90%;
+  animation: floatShield 30s ease-in-out infinite;
+}
+
+@keyframes frontLock {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(24px) scale(1.04);
+  }
+}
+@keyframes floatShield {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  1000% {
+    transform: translateY(-20px) scale(1.06);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes dr {
 }
 
 .auth-box {
-  background: rgb(252, 250, 250);
+  /* Apple glassmorphism effect */
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(6, 168, 255, 0.247);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   padding: 4rem;
-  border-radius: 15px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   width: 100%;
-  
   max-width: 500px;
   position: relative;
   overflow: hidden;
@@ -49,15 +123,15 @@
 .auth-form input {
   width: 100%;
   padding: 12px 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border: 2px solid #5ccbd3;
+  border-radius: 30px;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: #f8f9fa;
+  background: #ffffff00;
 }
 
 .auth-form input:focus {
-  border-color: #4a90e2;
+  border-color: #01134e;
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
   outline: none;
 }
@@ -67,7 +141,7 @@
   color: white;
   padding: 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 20px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -76,7 +150,7 @@
 }
 
 .auth-form button:hover {
-  background: #357abd;
+  background: #5d7d9c;
   transform: translateY(-1px);
 }
 
@@ -87,33 +161,37 @@
 
 /* Login page specific */
 .login-container .auth-box::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -70px;
   left: 50%;
   transform: translateX(-50%);
-  width: 80px;
-  height: 250px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a90e2'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.98 8.95-7 10.18-4.02-1.23-7-5.51-7-10.18V6.3l7-3.12z'/%3E%3C/svg%3E") no-repeat center;
+  width: 110px;
+  height: 267px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a90e2'%3E%3Cpath d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.98 8.95-7 10.18-4.02-1.23-7-5.51-7-10.18V6.3l7-3.12z'/%3E%3C/svg%3E")
+    no-repeat center;
   background-size: contain;
   opacity: 0;
-  animation: shieldDrop 1s ease-out forwards 0.5s, beat 1.5s ease-in-out infinite 2s;
+  animation: shieldDrop 1s ease-out forwards 0.5s,
+    beat 0.9s ease-in-out infinite 2s;
 }
 
 /* Register page specific */
 .register-container .auth-box::before {
-  content: '';
+  content: "";
   position: absolute;
-  
+
   top: -70px;
   left: 50%;
   transform: translateX(-50%);
-  width: 80px;
-  height: 250px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a90e2'%3E%3Cpath d='M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E") no-repeat center;
+  width: 150px;
+  height: 260px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a90e2'%3E%3Cpath d='M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E")
+    no-repeat center;
   background-size: contain;
-  opacity: 0;
-  animation: friendlyBounce 1s ease-out forwards 0.5s, beat 1.5s ease-in-out infinite 2s;
+  opacity: 390;
+  animation: friendlyBounce 1s ease-out forwards 0.5s,
+    beat 1s ease-in-out infinite 2s;
 }
 
 /* Profile page styles */
@@ -286,7 +364,7 @@
 }
 
 .auth-link:hover {
-  color: #357abd;
+  color: #8ef17b;
   text-decoration: underline;
 }
 
@@ -311,6 +389,11 @@
     top: -55px;
     width: 60px;
     height: 120px;
+  }
+  .auth-container .security-anim,
+  .auth-container .security-anim.shield {
+    width: 50px;
+    height: 50px;
   }
 }
 
@@ -365,14 +448,30 @@
 }
 
 @keyframes waveHand {
-  0% { transform: rotate(0deg); }
-  10% { transform: rotate(14deg); }
-  20% { transform: rotate(-8deg); }
-  30% { transform: rotate(14deg); }
-  40% { transform: rotate(-4deg); }
-  50% { transform: rotate(10deg); }
-  60% { transform: rotate(0deg); }
-  100% { transform: rotate(0deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 .fade-in {
@@ -394,7 +493,7 @@ button.loading {
 }
 
 button.loading::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 20px;
   height: 20px;
@@ -416,4 +515,175 @@ button.loading::after {
 input:disabled {
   background-color: #f5f5f5;
   cursor: not-allowed;
-} 
+}
+
+.security-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.security-shape {
+  position: absolute;
+  opacity: 0.16;
+  filter: blur(4px) brightness(1.1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Lock shape */
+.security-shape.lock {
+  width: 90px;
+  height: 120px;
+  top: 8%;
+  left: 4%;
+  background: radial-gradient(circle at 50% 35%, #00e2de 60%, transparent 70%),
+    linear-gradient(to bottom, #fff 0 20%, transparent 80% 100%),
+    radial-gradient(circle at 50% 10%, #e82603 40%, transparent 70%);
+  border-radius: 40% 40% 50% 50%/30% 30% 70% 70%;
+  animation: floatLock 6s ease-in-out infinite;
+}
+
+/* Shield shape */
+.security-shape.shield {
+  width: 110px;
+  height: 130px;
+  bottom: 10%;
+  right: 6%;
+  background: radial-gradient(ellipse at 50% 60%, #4a90e2 60%, transparent 80%),
+    linear-gradient(135deg, #fff 0 30%, transparent 80% 100%),
+    radial-gradient(ellipse at 50% 80%, #357abd 40%, transparent 80%);
+  border-radius: 50% 50% 70% 70%/40% 40% 90% 90%;
+  animation: floatShield 8s ease-in-out infinite;
+}
+
+/* Key shape */
+.security-shape.key {
+  width: 80px;
+  height: 80px;
+  top: 60%;
+  left: 12%;
+  background: radial-gradient(circle at 30% 60%, #f7b731 60%, transparent 70%),
+    radial-gradient(circle at 70% 30%, #f5cd79 40%, transparent 70%),
+    linear-gradient(45deg, #fff 0 20%, transparent 80% 100%);
+  border-radius: 60% 40% 60% 40%/50% 60% 40% 60%;
+  animation: floatKey 7s ease-in-out infinite;
+}
+
+/* Fingerprint shape */
+.security-shape.fingerprint {
+  width: 100px;
+  height: 100px;
+  top: 30%;
+  right: 18%;
+  background: repeating-radial-gradient(
+      circle at 50% 50%,
+      #700de2 0 8px,
+      transparent 10px 20px
+    ),
+    radial-gradient(circle at 50% 50%, #fff 0 10px, transparent 20px);
+  border-radius: 50%;
+  opacity: 0.11;
+  animation: floatFingerprint 9s ease-in-out infinite;
+}
+
+/* Padlock shape */
+.security-shape.padlock {
+  width: 70px;
+  height: 90px;
+  bottom: 18%;
+  left: 40%;
+  background: radial-gradient(circle at 50% 60%, #00b894 60%, transparent 80%),
+    linear-gradient(to bottom, #fff 0 20%, transparent 80% 100%),
+    radial-gradient(circle at 50% 10%, #0984e3 40%, transparent 70%);
+  border-radius: 40% 40% 50% 50%/30% 30% 70% 70%;
+  animation: floatPadlock 10s ease-in-out infinite;
+}
+
+@keyframes floatLock {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(24px) scale(1.04);
+  }
+  50% {
+    transform: translate(40vw, 10vh) scale(1.08);
+  }
+  75% {
+    transform: translateY(-18px) scale(1.02);
+  }
+}
+@keyframes floatShield {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translate(-30vw, -10vh) scale(1.03);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.06);
+  }
+  80% {
+    transform: translateY(10px) scale(1.01);
+  }
+}
+@keyframes floatKey {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  20% {
+    transform: translate(10vw, -10vh) scale(1.05);
+  }
+  50% {
+    transform: translateY(30px) scale(1.08);
+  }
+  70% {
+    transform: translate(-10vw, 10vh) scale(1.02);
+  }
+}
+@keyframes floatFingerprint {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translate(-20vw, 10vh) scale(1.04);
+  }
+  60% {
+    transform: translateY(-25px) scale(1.07);
+  }
+  90% {
+    transform: translateY(15px) scale(1.01);
+  }
+}
+@keyframes floatPadlock {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translate(15vw, -10vh) scale(1.06);
+  }
+  60% {
+    transform: translateY(20px) scale(1.09);
+  }
+  85% {
+    transform: translate(-10vw, 10vh) scale(1.03);
+  }
+}
+
+/* Responsive: shrink shapes on small screens */
+@media (max-width: 768px) {
+  .security-shape {
+    width: 50px !important;
+    height: 50px !important;
+  }
+}
