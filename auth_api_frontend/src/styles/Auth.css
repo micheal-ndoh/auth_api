@@ -372,14 +372,14 @@
 
 /* Link styling */
 .auth-link {
-  color: #4a90e2;
+  color: #e24a4c;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .auth-link:hover {
-  color: #8ef17b;
+  color: #ffffff;
   text-decoration: underline;
 }
 
