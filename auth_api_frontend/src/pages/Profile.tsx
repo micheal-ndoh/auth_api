@@ -50,11 +50,9 @@ const Profile: React.FC = () => {
     try {
       const api = new AuthApi(new Configuration({ basePath: API_BASE }));
       const resp = await api.profilePatch({
-        email: user.email, // if required by backend
-        password: '', // if required by backend
         firstname,
         lastname,
-      });
+      } as any);
       if (resp && resp.data) {
         setUser(resp.data);
         setSuccess('Profile updated!');
