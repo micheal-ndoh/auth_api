@@ -91,5 +91,3 @@ This document explains the purpose and details of each file in the `k8s/` direct
 - **Developer Experience:** Clean URLs, SPA support, and easy local/offline development.
 
 ---
-
-If you have any questions about these files or want to customize your setup further, just ask! 
