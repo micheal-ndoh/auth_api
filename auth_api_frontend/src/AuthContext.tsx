@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { AuthApi, Configuration, LoginRequest, LoginResponse, User, ProtectedApi, RegisterRequest } from './ts-client';
 
-const API_BASE = 'https://authapi-backend-01.up.railway.app';
+const API_BASE = '/api';
 
 interface AuthContextType {
   user: User | null;

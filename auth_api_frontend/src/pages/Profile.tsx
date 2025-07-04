@@ -4,7 +4,7 @@ import { useAuth } from '../AuthContext';
 import '../styles/Auth.css';
 import { AuthApi, Configuration } from '../ts-client';
 
-const API_BASE = 'https://authapi-backend-01.up.railway.app';
+const API_BASE = '/api';
 
 const Profile: React.FC = () => {
   const { user, logout, setUser } = useAuth();
