@@ -17,7 +17,7 @@ RUN cargo build --release --target x86_64-unknown-linux-musl
 # Stage 2: Minimal runtime image
 FROM alpine:latest
 WORKDIR /app
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/auth_api .
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/auth-api .
 
 EXPOSE 3000
-CMD ["./auth_api"] 
+CMD ["./auth-api"] 
