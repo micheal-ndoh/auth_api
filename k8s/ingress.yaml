@@ -2,20 +2,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: auth-api-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
+  ingressClassName: traefik
   rules:
     - http:
         paths:
-          - path: /api(/|$)(.*)
+          - path: /api
             pathType: Prefix
             backend:
               service:
                 name: auth-api-backend
                 port:
                   number: 3000
-          - path: /(.*)
+          - path: /
             pathType: Prefix
             backend:
               service:
