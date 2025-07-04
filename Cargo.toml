@@ -17,6 +17,6 @@ tower-http = {version = "0.6.6", features = ["cors"]}
 utoipa = {version = "5.4", features = ["axum_extras"]}
 utoipa-swagger-ui = {version = "9.0.2", features = ["axum"]}
 
-sqlx = {version = "0.7", features = ["runtime-tokio", "postgres", "macros"]}
 regex = "1.11.1"
-validator_derive = "0.20.0"
+sqlx = {version = "0.7", features = ["runtime-tokio", "postgres", "macros"]}
+validator = {version = "0.16", features = ["derive"]}
