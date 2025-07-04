@@ -3,10 +3,7 @@
   "info": {
     "title": "Auth API",
     "description": "A simple auth API",
-    "license": {
-      "name": "MIT",
-      "identifier": "MIT"
-    },
+    "license": { "name": "MIT", "identifier": "MIT" },
     "version": "0.1.0"
   },
   "paths": {
@@ -85,6 +82,33 @@
             }
           },
           "403": { "description": "Forbidden" }
+        },
+        "security": [{ "api_key": [] }]
+      }
+    },
+    "/profile": {
+      "patch": {
+        "tags": ["auth"],
+        "operationId": "profile_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" }
         },
         "security": [{ "api_key": [] }]
       }
