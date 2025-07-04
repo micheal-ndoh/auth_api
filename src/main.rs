@@ -73,7 +73,7 @@ async fn main() {
                 .parse::<HeaderValue>()
                 .unwrap(),
         )
-        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS, Method::PATCH])
         .allow_headers(Any);
 
     let app = Router::new()
