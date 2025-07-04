@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-api-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-api-backend
+                port:
+                  number: 3000
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-api-frontend
+                port:
+                  number: 80 
