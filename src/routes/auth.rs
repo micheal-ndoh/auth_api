@@ -74,7 +74,7 @@ pub async fn register(
     State(state): State<AppState>,
     Json(payload): Json<RegisterRequest>,
 ) -> impl IntoResponse {
-    if payload.email.is_empty() || payload.password.is_empty() {
+    if payload.email.is_empty() || payload.password.as_deref().unwrap_or("").is_empty() {
         return (
             StatusCode::BAD_REQUEST,
             Json(json!({"error": "email and password are required"})),
@@ -115,7 +115,7 @@ pub async fn register(
         )
             .into_response();
     }
-    let hashed_password = hash(&payload.password, DEFAULT_COST).unwrap();
+    let hashed_password = hash(payload.password.as_deref().unwrap_or(""), DEFAULT_COST).unwrap();
     let user = sqlx::query_as::<_, User>(
         "INSERT INTO users (email, firstname, lastname, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, firstname, lastname, password_hash, role"
     )
