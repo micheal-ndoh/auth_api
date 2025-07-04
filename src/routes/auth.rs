@@ -10,7 +10,7 @@ use std::sync::Arc;
 use utoipa::OpenApi;
 
 use crate::middleware::auth::Claims;
-use crate::models::user::{RegisterRequest, User};
+use crate::models::user::{ProfileUpdateRequest, RegisterRequest, User};
 use crate::models::{LoginRequest, LoginResponse, Role};
 use crate::AppState;
 
@@ -143,7 +143,7 @@ pub async fn register(
 #[utoipa::path(
     patch,
     path = "/profile",
-    request_body = RegisterRequest,
+    request_body = ProfileUpdateRequest,
     responses(
         (status = 200, description = "Profile updated successfully", body = User),
         (status = 400, description = "Bad request"),
@@ -154,45 +154,51 @@ pub async fn register(
 pub async fn update_profile(
     State(state): State<AppState>,
     Extension(user): Extension<Arc<User>>,
-    Json(payload): Json<RegisterRequest>,
+    Json(payload): Json<ProfileUpdateRequest>,
 ) -> impl IntoResponse {
     // Log the incoming payload for debugging
     eprintln!("PATCH /profile payload: {:?}", payload);
 
-    // Name validation: at least 2 letters
-    if payload
-        .firstname
-        .chars()
-        .filter(|c| c.is_alphabetic())
-        .count()
-        < 2
-    {
-        eprintln!("First name validation failed: {:?}", payload.firstname);
+    // Validate request
+    if let Err(e) = payload.validate() {
+        eprintln!("Validation error: {}", e);
         return (
             StatusCode::BAD_REQUEST,
-            Json(json!({"error": "First name must contain at least 2 letters"})),
+            Json(json!({"error": format!("Validation error: {}", e)})),
         )
             .into_response();
     }
-    if payload
-        .lastname
-        .chars()
-        .filter(|c| c.is_alphabetic())
-        .count()
-        < 2
-    {
-        eprintln!("Last name validation failed: {:?}", payload.lastname);
-        return (
-            StatusCode::BAD_REQUEST,
-            Json(json!({"error": "Last name must contain at least 2 letters"})),
-        )
-            .into_response();
+
+    // Prepare fields for update
+    let mut hashed_password: Option<String> = None;
+    if let Some(ref pass) = payload.password {
+        match hash(pass, DEFAULT_COST) {
+            Ok(h) => hashed_password = Some(h),
+            Err(e) => {
+                eprintln!("Password hash error: {}", e);
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({"error": "Failed to hash password"})),
+                )
+                    .into_response();
+            }
+        }
     }
+
+    // Update user in DB using COALESCE for partial update
     let updated = sqlx::query_as::<_, User>(
-        "UPDATE users SET firstname = $1, lastname = $2 WHERE id = $3 RETURNING id, email, firstname, lastname, password_hash, role"
+        "UPDATE users SET \
+            firstname = COALESCE($1, firstname),\
+            lastname = COALESCE($2, lastname),\
+            email = COALESCE($3, email),\
+            password_hash = COALESCE($4, password_hash)\
+         WHERE id = $5\
+         RETURNING id, email, firstname, lastname, password_hash, role",
     )
-    .bind(&payload.firstname)
-    .bind(&payload.lastname)
+    .bind(payload.firstname.as_ref())
+    .bind(payload.lastname.as_ref())
+    .bind(payload.email.as_ref())
+    .bind(hashed_password.as_ref())
     .bind(user.id)
     .fetch_one(&state.db)
     .await;

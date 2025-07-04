@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use utoipa::ToSchema;
+use validator::Validate;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, FromRow)]
 pub struct User {
@@ -43,4 +44,18 @@ pub struct RegisterResponse {
     pub firstname: String,
     pub lastname: String,
     pub email: String,
+}
+
+#[derive(Debug, Deserialize, Validate, ToSchema, Default)]
+pub struct ProfileUpdateRequest {
+    #[validate(length(min = 2, max = 50))]
+    pub firstname: Option<String>,
+    #[validate(length(min = 2, max = 50))]
+    pub lastname: Option<String>,
+    #[validate(email)]
+    pub email: Option<String>,
+    #[validate(length(min = 6))]
+    pub password: Option<String>,
+    // Profile picture as a URL or base64 string (optional)
+    pub profile_picture: Option<String>,
 }
