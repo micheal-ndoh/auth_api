@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import '../styles/Auth.css';
-import { AuthApi } from '../ts-client';
+import { AuthApi, Configuration } from '../ts-client';
+
+const API_BASE = 'https://authapi-backend-01.up.railway.app';
 
 const Profile: React.FC = () => {
   const { user, logout, setUser } = useAuth();
@@ -46,7 +48,7 @@ const Profile: React.FC = () => {
     setError('');
     setSuccess('');
     try {
-      const api = new AuthApi();
+      const api = new AuthApi(new Configuration({ basePath: API_BASE }));
       const resp = await api.profilePatch({
         email: user.email, // if required by backend
         password: '', // if required by backend
