@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import '../styles/Auth.css';
+import { AuthApi } from '../ts-client';
 
 const Profile: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
+  const [editing, setEditing] = useState(false);
+  const [firstname, setFirstname] = useState(user?.firstname || '');
+  const [lastname, setLastname] = useState(user?.lastname || '');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   console.log('Profile user:', user);
 
@@ -18,6 +25,44 @@ const Profile: React.FC = () => {
 
   const getInitials = (firstname: string, lastname: string) => {
     return `${firstname.charAt(0)}${lastname.charAt(0)}`.toUpperCase();
+  };
+
+  const handleEdit = () => {
+    setEditing(true);
+    setError('');
+    setSuccess('');
+  };
+
+  const handleCancel = () => {
+    setEditing(false);
+    setFirstname(user.firstname);
+    setLastname(user.lastname);
+    setError('');
+    setSuccess('');
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const api = new AuthApi();
+      const resp = await api.profilePatch({
+        email: user.email, // if required by backend
+        password: '', // if required by backend
+        firstname,
+        lastname,
+      });
+      if (resp && resp.data) {
+        setUser(resp.data);
+        setSuccess('Profile updated!');
+        setEditing(false);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,20 +89,56 @@ const Profile: React.FC = () => {
           </div>
           <div className="profile-field">
             <strong>First Name</strong>
-            <span>{user.firstname}</span>
+            {editing ? (
+              <input
+                type="text"
+                value={firstname}
+                onChange={e => setFirstname(e.target.value)}
+                minLength={2}
+                required
+              />
+            ) : (
+              <span>{user.firstname}</span>
+            )}
           </div>
           <div className="profile-field">
             <strong>Last Name</strong>
-            <span>{user.lastname}</span>
+            {editing ? (
+              <input
+                type="text"
+                value={lastname}
+                onChange={e => setLastname(e.target.value)}
+                minLength={2}
+                required
+              />
+            ) : (
+              <span>{user.lastname}</span>
+            )}
           </div>
           <div className="profile-field">
             <strong>Role</strong>
             <span>{user.role}</span>
           </div>
         </div>
+        {editing ? (
+          <div className="profile-edit-actions">
+            <button onClick={handleSave} disabled={loading} className="save-button">
+              {loading ? 'Saving...' : 'Save'}
+            </button>
+            <button onClick={handleCancel} disabled={loading} className="cancel-button">
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button onClick={handleEdit} className="edit-button">
+            Edit Profile
+          </button>
+        )}
         <button onClick={handleLogout} className="logout-button">
           Logout
         </button>
+        {error && <div className="error">{error}</div>}
+        {success && <div className="success">{success}</div>}
       </div>
     </div>
   );
