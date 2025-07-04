@@ -86,6 +86,7 @@ async fn main() {
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/login", post(auth::login))
         .route("/register", post(auth::register))
+        .route("/profile", axum::routing::patch(auth::update_profile))
         .layer(cors)
         .with_state(state);
     println!("Running on http://localhost:3000/swagger-ui");
