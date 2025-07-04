@@ -16,7 +16,7 @@ kind: Deployment
 metadata:
   name: auth-api-frontend
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: auth-api-frontend
