@@ -27,6 +27,6 @@ spec:
     spec:
       containers:
         - name: auth-api-frontend
-          image: ghcr.io/${REPO_OWNER}/${REPO_NAME}-frontend:latest
+          image: ghcr.io/micheal-ndoh/auth_api-frontend:latest
           ports:
             - containerPort: 80 
