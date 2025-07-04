@@ -156,6 +156,9 @@ pub async fn update_profile(
     Extension(user): Extension<Arc<User>>,
     Json(payload): Json<RegisterRequest>,
 ) -> impl IntoResponse {
+    // Log the incoming payload for debugging
+    eprintln!("PATCH /profile payload: {:?}", payload);
+
     // Name validation: at least 2 letters
     if payload
         .firstname
@@ -164,6 +167,7 @@ pub async fn update_profile(
         .count()
         < 2
     {
+        eprintln!("First name validation failed: {:?}", payload.firstname);
         return (
             StatusCode::BAD_REQUEST,
             Json(json!({"error": "First name must contain at least 2 letters"})),
@@ -177,6 +181,7 @@ pub async fn update_profile(
         .count()
         < 2
     {
+        eprintln!("Last name validation failed: {:?}", payload.lastname);
         return (
             StatusCode::BAD_REQUEST,
             Json(json!({"error": "Last name must contain at least 2 letters"})),
@@ -193,10 +198,13 @@ pub async fn update_profile(
     .await;
     match updated {
         Ok(updated_user) => (StatusCode::OK, Json(updated_user)).into_response(),
-        Err(e) => (
-            StatusCode::BAD_REQUEST,
-            Json(json!({"error": format!("Failed to update profile: {}", e)})),
-        )
-            .into_response(),
+        Err(e) => {
+            eprintln!("Failed to update profile for user {}: {}", user.id, e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": format!("Failed to update profile: {}", e)})),
+            )
+                .into_response()
+        }
     }
 }
