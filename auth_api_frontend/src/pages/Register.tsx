@@ -4,6 +4,13 @@ import { useAuth } from '../AuthContext';
 import { Role } from '../ts-client';
 import '../styles/Auth.css';
 
+const getPasswordStrength = (password: string) => {
+  const minLength = password.length >= 8;
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  return minLength && hasNumber && hasSpecial;
+};
+
 const Register: React.FC = () => {
   const { register, login, loading } = useAuth();
   const navigate = useNavigate();
@@ -12,10 +19,15 @@ const Register: React.FC = () => {
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!getPasswordStrength(password)) {
+      setError('Password is too weak.');
+      return;
+    }
     try {
       await register({
         email,
@@ -30,6 +42,8 @@ const Register: React.FC = () => {
       setError('Registration failed');
     }
   };
+
+  const passwordStrong = getPasswordStrength(password);
 
   return (
     <div className="auth-container register-container">
@@ -63,14 +77,36 @@ const Register: React.FC = () => {
               required
             />
           </div>
-          <div className="input-group">
+          <div className="input-group" style={{ position: 'relative' }}>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
+              style={{
+                borderColor: password.length === 0 ? '' : passwordStrong ? 'green' : 'red',
+              }}
             />
+            <span
+              onClick={() => setShowPassword(s => !s)}
+              style={{
+                position: 'absolute',
+                right: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                cursor: 'pointer',
+                userSelect: 'none',
+                fontSize: 18,
+              }}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              role="button"
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </span>
+          </div>
+          <div style={{ fontSize: 13, color: passwordStrong ? 'green' : 'red', marginBottom: 8 }}>
+            Password must be at least 8 characters, contain a number and a special character.
           </div>
           <button type="submit" disabled={loading}>
             {loading ? 'Creating Account...' : 'Register'}

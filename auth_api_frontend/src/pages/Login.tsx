@@ -10,6 +10,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,15 +42,31 @@ const Login: React.FC = () => {
               disabled={loading}
             />
           </div>
-          <div className="input-group">
+          <div className="input-group" style={{ position: 'relative' }}>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
               disabled={loading}
             />
+            <span
+              onClick={() => setShowPassword(s => !s)}
+              style={{
+                position: 'absolute',
+                right: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                cursor: 'pointer',
+                userSelect: 'none',
+                fontSize: 18,
+              }}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              role="button"
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </span>
           </div>
           <button 
             type="submit" 
