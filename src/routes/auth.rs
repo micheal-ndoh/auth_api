@@ -8,6 +8,7 @@ use serde_json::json;
 use sqlx::prelude::*;
 use std::sync::Arc;
 use utoipa::OpenApi;
+use validator::Validate;
 
 use crate::middleware::auth::Claims;
 use crate::models::user::{ProfileUpdateRequest, RegisterRequest, User};
