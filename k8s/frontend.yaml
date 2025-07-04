@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api-frontend
+spec:
+  selector:
+    app: auth-api-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api-frontend
+  template:
+    metadata:
+      labels:
+        app: auth-api-frontend
+    spec:
+      containers:
+        - name: auth-api-frontend
+          image: ghcr.io/${REPO_OWNER}/${REPO_NAME}-frontend:latest
+          ports:
+            - containerPort: 80 
