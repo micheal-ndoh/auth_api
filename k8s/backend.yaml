@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: auth-api-backend
-          image: ghcr.io/${REPO_OWNER}/${REPO_NAME}-backend:latest
+          image: ghcr.io/micheal-ndoh/auth_api-backend:latest
           ports:
             - containerPort: 3000
           env:
