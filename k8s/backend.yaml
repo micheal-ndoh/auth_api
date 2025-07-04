@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api-backend
+spec:
+  selector:
+    app: auth-api-backend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api-backend
+  template:
+    metadata:
+      labels:
+        app: auth-api-backend
+    spec:
+      containers:
+        - name: auth-api-backend
+          image: ghcr.io/${REPO_OWNER}/${REPO_NAME}-backend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-api-config
+                  key: DATABASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-api-secrets
+                  key: JWT_SECRET
+            - name: JWT_SALT
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-api-config
+                  key: JWT_SALT
+            - name: JWT_EXPIRATION
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-api-config
+                  key: JWT_EXPIRATION 
