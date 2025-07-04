@@ -1,9 +1,12 @@
-use axum::extract::State;
+use axum::extract::{Extension, State};
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use bcrypt::{hash, verify, DEFAULT_COST};
 use jsonwebtoken::{encode, EncodingKey, Header};
+use regex;
+use regex::Regex;
 use serde_json::json;
 use sqlx::prelude::*;
+use std::sync::Arc;
 use utoipa::OpenApi;
 
 use crate::middleware::auth::Claims;
@@ -78,6 +81,40 @@ pub async fn register(
         )
             .into_response();
     }
+    let email_regex = regex::Regex::new(r"^[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}$").unwrap();
+    if !email_regex.is_match(&payload.email) {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid email format"})),
+        )
+            .into_response();
+    }
+    if payload
+        .firstname
+        .chars()
+        .filter(|c| c.is_alphabetic())
+        .count()
+        < 2
+    {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "First name must contain at least 2 letters"})),
+        )
+            .into_response();
+    }
+    if payload
+        .lastname
+        .chars()
+        .filter(|c| c.is_alphabetic())
+        .count()
+        < 2
+    {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Last name must contain at least 2 letters"})),
+        )
+            .into_response();
+    }
     let hashed_password = hash(&payload.password, DEFAULT_COST).unwrap();
     let user = sqlx::query_as::<_, User>(
         "INSERT INTO users (email, firstname, lastname, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, firstname, lastname, password_hash, role"
@@ -98,6 +135,67 @@ pub async fn register(
         Err(e) => (
             StatusCode::CONFLICT,
             Json(json!({"error": format!("Failed to register user: {}", e)})),
+        )
+            .into_response(),
+    }
+}
+
+#[utoipa::path(
+    patch,
+    path = "/profile",
+    request_body = RegisterRequest,
+    responses(
+        (status = 200, description = "Profile updated successfully", body = User),
+        (status = 400, description = "Bad request"),
+        (status = 401, description = "Unauthorized")
+    ),
+    security(("api_key" = []))
+)]
+pub async fn update_profile(
+    State(state): State<AppState>,
+    Extension(user): Extension<Arc<User>>,
+    Json(payload): Json<RegisterRequest>,
+) -> impl IntoResponse {
+    // Name validation: at least 2 letters
+    if payload
+        .firstname
+        .chars()
+        .filter(|c| c.is_alphabetic())
+        .count()
+        < 2
+    {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "First name must contain at least 2 letters"})),
+        )
+            .into_response();
+    }
+    if payload
+        .lastname
+        .chars()
+        .filter(|c| c.is_alphabetic())
+        .count()
+        < 2
+    {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Last name must contain at least 2 letters"})),
+        )
+            .into_response();
+    }
+    let updated = sqlx::query_as::<_, User>(
+        "UPDATE users SET firstname = $1, lastname = $2 WHERE id = $3 RETURNING id, email, firstname, lastname, password_hash, role"
+    )
+    .bind(&payload.firstname)
+    .bind(&payload.lastname)
+    .bind(user.id)
+    .fetch_one(&state.db)
+    .await;
+    match updated {
+        Ok(updated_user) => (StatusCode::OK, Json(updated_user)).into_response(),
+        Err(e) => (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": format!("Failed to update profile: {}", e)})),
         )
             .into_response(),
     }
