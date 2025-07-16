@@ -84,9 +84,12 @@ const Login: React.FC = () => {
             onSuccess={async (credentialResponse) => {
               if (credentialResponse.credential) {
                 try {
-                  const res = await axios.post("/auth/google", {
-                    id_token: credentialResponse.credential,
-                  });
+                  const res = await axios.post(
+                    "https://authapi-backend-01.up.railway.app/auth/google",
+                    {
+                      id_token: credentialResponse.credential,
+                    }
+                  );
                   // You may want to store the token/session here
                   // For now, just redirect to profile
                   navigate("/profile");

@@ -1,7 +1,22 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { AuthApi, Configuration, LoginRequest, LoginResponse, User, ProtectedApi, RegisterRequest } from './ts-client';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
+import {
+  AuthApi,
+  Configuration,
+  LoginRequest,
+  LoginResponse,
+  User,
+  ProtectedApi,
+  RegisterRequest,
+} from "./ts-client";
 
-const API_BASE = '/api';
+const API_BASE = "https://authapi-backend-01.up.railway.app";
 
 interface AuthContextType {
   user: User | null;
@@ -18,7 +33,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 };
 
@@ -26,46 +41,49 @@ let logoutTimer: NodeJS.Timeout | null = null;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem('user');
+    const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : null;
   });
   const [accessToken, setAccessToken] = useState<string | null>(() => {
-    return localStorage.getItem('accessToken');
+    return localStorage.getItem("accessToken");
   });
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const getApiConfig = useCallback((token?: string) => {
-    return new Configuration({
-      basePath: API_BASE,
-      accessToken: token || accessToken || undefined,
-    });
-  }, [accessToken]);
+  const getApiConfig = useCallback(
+    (token?: string) => {
+      return new Configuration({
+        basePath: API_BASE,
+        accessToken: token || accessToken || undefined,
+      });
+    },
+    [accessToken]
+  );
 
   const authApi = new AuthApi(getApiConfig());
 
   useEffect(() => {
-    console.log('AuthContext accessToken:', accessToken);
+    console.log("AuthContext accessToken:", accessToken);
   }, [accessToken]);
 
   useEffect(() => {
-    console.log('AuthContext user:', user);
+    console.log("AuthContext user:", user);
   }, [user]);
 
   // Persist user and token
   useEffect(() => {
     if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem('user');
+      localStorage.removeItem("user");
     }
   }, [user]);
 
   useEffect(() => {
     if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem("accessToken", accessToken);
     } else {
-      localStorage.removeItem('accessToken');
+      localStorage.removeItem("accessToken");
     }
   }, [accessToken]);
 
@@ -74,55 +92,61 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAccessToken(null);
     setRefreshToken(null);
     setUser(null);
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
     if (logoutTimer) clearTimeout(logoutTimer);
   }, []);
 
   // Fetch user profile (now after logout is defined)
-  const fetchUserProfile = useCallback(async (token: string) => {
-    try {
-      const protectedApi = new ProtectedApi(getApiConfig(token));
-      const response = await protectedApi.userRoute({
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.data) {
-        setUser(response.data);
-        return response.data;
+  const fetchUserProfile = useCallback(
+    async (token: string) => {
+      try {
+        const protectedApi = new ProtectedApi(getApiConfig(token));
+        const response = await protectedApi.userRoute({
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.data) {
+          setUser(response.data);
+          return response.data;
+        }
+        throw new Error("Failed to fetch user data");
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        logout();
+        throw error;
       }
-      throw new Error('Failed to fetch user data');
-    } catch (error) {
-      console.error('Failed to fetch user profile:', error);
-      logout();
-      throw error;
-    }
-  }, [getApiConfig, logout]);
+    },
+    [getApiConfig, logout]
+  );
 
   // Helper to set session and timer
-  const startSession = useCallback(async (access: string, refresh: string) => {
-    setAccessToken(access);
-    setRefreshToken(refresh);
-    if (logoutTimer) clearTimeout(logoutTimer);
-    logoutTimer = setTimeout(() => {
-      logout();
-    }, 10 * 60 * 1000); // 10 minutes
-    
-    // Fetch user profile after setting the token
-    return await fetchUserProfile(access);
-  }, [fetchUserProfile]);
+  const startSession = useCallback(
+    async (access: string, refresh: string) => {
+      setAccessToken(access);
+      setRefreshToken(refresh);
+      if (logoutTimer) clearTimeout(logoutTimer);
+      logoutTimer = setTimeout(() => {
+        logout();
+      }, 10 * 60 * 1000); // 10 minutes
+
+      // Fetch user profile after setting the token
+      return await fetchUserProfile(access);
+    },
+    [fetchUserProfile]
+  );
 
   // Login
   const login = async (data: LoginRequest) => {
     setLoading(true);
     try {
       const resp = await authApi.login(data);
-      console.log('Login response:', resp);
+      console.log("Login response:", resp);
       if (resp.data && resp.data.token) {
-        await startSession(resp.data.token, ''); // No refreshToken in response
+        await startSession(resp.data.token, ""); // No refreshToken in response
       } else {
-        throw new Error('Invalid login response');
+        throw new Error("Invalid login response");
       }
     } finally {
       setLoading(false);
@@ -134,7 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const resp = await authApi.register(data);
-      console.log('Register response:', resp);
+      console.log("Register response:", resp);
     } finally {
       setLoading(false);
     }
@@ -177,8 +201,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, refreshToken, login, logout, register, loading, setUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        accessToken,
+        refreshToken,
+        login,
+        logout,
+        register,
+        loading,
+        setUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}; 
+};

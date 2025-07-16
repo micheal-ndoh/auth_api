@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import '../styles/Auth.css';
-import { AuthApi, Configuration } from '../ts-client';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
+import "../styles/Auth.css";
+import { AuthApi, Configuration } from "../ts-client";
 
-const API_BASE = '/api';
+const API_BASE = "https://authapi-backend-01.up.railway.app";
 
 const Profile: React.FC = () => {
   const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
-  const [firstname, setFirstname] = useState(user?.firstname || '');
-  const [lastname, setLastname] = useState(user?.lastname || '');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [firstname, setFirstname] = useState(user?.firstname || "");
+  const [lastname, setLastname] = useState(user?.lastname || "");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  console.log('Profile user:', user);
+  console.log("Profile user:", user);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   if (!user) return null;
@@ -31,22 +31,22 @@ const Profile: React.FC = () => {
 
   const handleEdit = () => {
     setEditing(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
   };
 
   const handleCancel = () => {
     setEditing(false);
     setFirstname(user.firstname);
     setLastname(user.lastname);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
   };
 
   const handleSave = async () => {
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     try {
       const api = new AuthApi(new Configuration({ basePath: API_BASE }));
       const resp = await api.profilePatch({
@@ -55,11 +55,11 @@ const Profile: React.FC = () => {
       } as any);
       if (resp && resp.data) {
         setUser(resp.data);
-        setSuccess('Profile updated!');
+        setSuccess("Profile updated!");
         setEditing(false);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update profile');
+      setError(err.response?.data?.error || "Failed to update profile");
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,9 @@ const Profile: React.FC = () => {
       <div className="profile-box">
         {/* Welcome Animation */}
         <div className="welcome-animation">
-          <span role="img" aria-label="wave" className="wave-emoji">👋</span>
+          <span role="img" aria-label="wave" className="wave-emoji">
+            👋
+          </span>
           <h1 className="fade-in">Welcome, {user.firstname}!</h1>
         </div>
         <div className="profile-header">
@@ -93,7 +95,7 @@ const Profile: React.FC = () => {
               <input
                 type="text"
                 value={firstname}
-                onChange={e => setFirstname(e.target.value)}
+                onChange={(e) => setFirstname(e.target.value)}
                 minLength={2}
                 required
               />
@@ -107,7 +109,7 @@ const Profile: React.FC = () => {
               <input
                 type="text"
                 value={lastname}
-                onChange={e => setLastname(e.target.value)}
+                onChange={(e) => setLastname(e.target.value)}
                 minLength={2}
                 required
               />
@@ -122,10 +124,18 @@ const Profile: React.FC = () => {
         </div>
         {editing ? (
           <div className="profile-edit-actions">
-            <button onClick={handleSave} disabled={loading} className="save-button">
-              {loading ? 'Saving...' : 'Save'}
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="save-button"
+            >
+              {loading ? "Saving..." : "Save"}
             </button>
-            <button onClick={handleCancel} disabled={loading} className="cancel-button">
+            <button
+              onClick={handleCancel}
+              disabled={loading}
+              className="cancel-button"
+            >
               Cancel
             </button>
           </div>
