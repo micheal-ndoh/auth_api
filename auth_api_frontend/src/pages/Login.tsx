@@ -6,7 +6,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 
 const Login: React.FC = () => {
-  const { login, loading } = useAuth();
+  const { login, loading, loginWithToken } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
@@ -90,9 +90,12 @@ const Login: React.FC = () => {
                       id_token: credentialResponse.credential,
                     }
                   );
-                  // You may want to store the token/session here
-                  // For now, just redirect to profile
-                  navigate("/profile");
+                  if (res.data && res.data.token) {
+                    await loginWithToken(res.data.token);
+                    navigate("/profile");
+                  } else {
+                    setError("Google login failed: No token returned");
+                  }
                 } catch (err: any) {
                   setError("Google login failed");
                 }

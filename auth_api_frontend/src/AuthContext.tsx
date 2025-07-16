@@ -27,6 +27,7 @@ interface AuthContextType {
   register: (data: RegisterRequest) => Promise<void>;
   loading: boolean;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  loginWithToken: (token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -137,6 +138,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [fetchUserProfile]
   );
 
+  // Public helper for Google login or direct token login
+  const loginWithToken = useCallback(
+    async (token: string) => {
+      setLoading(true);
+      try {
+        await startSession(token, "");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [startSession]
+  );
+
   // Login
   const login = async (data: LoginRequest) => {
     setLoading(true);
@@ -211,6 +225,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         loading,
         setUser,
+        loginWithToken, // <-- add to context
       }}
     >
       {children}
