@@ -1,3 +1,7 @@
+use crate::middleware::auth::Claims;
+use crate::models::user::{ProfileUpdateRequest, RegisterRequest, User};
+use crate::models::{LoginRequest, LoginResponse, Role};
+use crate::AppState;
 use axum::extract::{Extension, State};
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use bcrypt::{hash, verify, DEFAULT_COST};
