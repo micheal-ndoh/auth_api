@@ -4,16 +4,14 @@ use bcrypt::{hash, verify, DEFAULT_COST};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use regex;
 use regex::Regex;
+use reqwest;
+use serde::Deserialize;
 use serde_json::json;
+use serde_json::Value;
 use sqlx::prelude::*;
 use std::sync::Arc;
 use utoipa::OpenApi;
 use validator::Validate;
-
-use crate::middleware::auth::Claims;
-use crate::models::user::{ProfileUpdateRequest, RegisterRequest, User};
-use crate::models::{LoginRequest, LoginResponse, Role};
-use crate::AppState;
 
 #[derive(OpenApi)]
 #[openapi(paths(login), components(schemas(LoginRequest, LoginResponse)))]
@@ -214,4 +212,86 @@ pub async fn update_profile(
                 .into_response()
         }
     }
+}
+
+#[derive(Deserialize)]
+pub struct GoogleAuthRequest {
+    pub id_token: String,
+}
+
+/// POST /auth/google
+pub async fn google_auth(
+    State(state): State<AppState>,
+    Json(payload): Json<GoogleAuthRequest>,
+) -> impl IntoResponse {
+    // Verify the token with Google
+    let client = reqwest::Client::new();
+    let token_info_url = format!(
+        "https://oauth2.googleapis.com/tokeninfo?id_token={}",
+        payload.id_token
+    );
+    let resp = client.get(&token_info_url).send().await;
+    if let Ok(response) = resp {
+        if let Ok(json) = response.json::<Value>().await {
+            // Check audience
+            let aud = json.get("aud").and_then(|v| v.as_str());
+            if aud != Some(&state.config.google_client_id) {
+                return (
+                    StatusCode::UNAUTHORIZED,
+                    Json(json!({"error": "Invalid Google client ID"})),
+                )
+                    .into_response();
+            }
+            // Extract user info
+            let email = json.get("email").and_then(|v| v.as_str()).unwrap_or("");
+            let firstname = json
+                .get("given_name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            let lastname = json
+                .get("family_name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            // Find or create user
+            let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE email = $1")
+                .bind(email)
+                .fetch_optional(&state.db)
+                .await
+                .unwrap();
+            let user = if let Some(user) = user {
+                user
+            } else {
+                // Insert user with empty password_hash
+                sqlx::query_as::<_, User>(
+                    "INSERT INTO users (email, firstname, lastname, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, firstname, lastname, password_hash, role"
+                )
+                .bind(email)
+                .bind(firstname)
+                .bind(lastname)
+                .bind("")
+                .bind("User")
+                .fetch_one(&state.db)
+                .await
+                .unwrap()
+            };
+            // Issue JWT
+            let claims = Claims {
+                sub: user.email.clone(),
+                role: user.role.clone(),
+                exp: (chrono::Utc::now() + chrono::Duration::minutes(10)).timestamp() as usize,
+            };
+            let token = jsonwebtoken::encode(
+                &jsonwebtoken::Header::default(),
+                &claims,
+                &jsonwebtoken::EncodingKey::from_secret(state.config.jwt_secret.as_ref()),
+            )
+            .unwrap();
+            return (StatusCode::OK, Json(LoginResponse { token })).into_response();
+        }
+    }
+    (
+        StatusCode::UNAUTHORIZED,
+        Json(json!({"error": "Invalid Google token"})),
+    )
+        .into_response()
 }
