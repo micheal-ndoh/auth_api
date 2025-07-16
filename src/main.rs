@@ -87,6 +87,7 @@ async fn main() {
         .route("/login", post(auth::login))
         .route("/register", post(auth::register))
         .route("/profile", axum::routing::patch(auth::update_profile))
+        .route("/auth/google", post(auth::google_auth))
         .layer(cors)
         .with_state(state);
     println!("Running on http://localhost:3000/swagger-ui");
